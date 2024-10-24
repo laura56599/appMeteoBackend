@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put, Request, UseGuards, UnauthorizedException } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { LoginDto } from './dto/login-user.dto';
+import { JwtAuthGuard } from 'src/auth/Guards/jwt-auth.guard';
 
 @Controller('user')
 export class UserController {
@@ -11,23 +13,18 @@ export class UserController {
   async create(@Body() createUserDto: CreateUserDto) {
     return await this.userService.create(createUserDto);
   }
-
-  @Get()
-  findAll() {
-    return this.userService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(id);
-  }
-
+  @UseGuards(JwtAuthGuard)
   @Put('/update/:id')
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @Request() req) {
+    
+    const userIdFromToken = req.user.sub;
+    if (id !== userIdFromToken) {
+      throw new UnauthorizedException('No puedes actualizar otro usuario');
+    }
     return this.userService.update(id, updateUserDto);
   }
 
-  @Delete(':id')
+  @Delete('/delete/:id')
   remove(@Param('id') id: string) {
     return this.userService.remove(id);
   }

@@ -15,7 +15,7 @@ export class UserService {
     const hashpass = await this.hashPassword(createUserDto.password);
     const newUser = new this.userModel({ ...createUserDto, password: hashpass });
     return await newUser.save();
-    
+
   }
 
   private async hashPassword(password: string): Promise<string> {
@@ -24,12 +24,29 @@ export class UserService {
     return await bcrypt.hash(password, salt);
 }
 
-  findAll() {
-    return `This action returns all user`;
+  async validateUser(username: string, password: string): Promise<User | null> {
+    const user = await this.userModel.findOne({ username });
+    if (user && await bcrypt.compare(password, user.password)) {
+    return user; 
+  }
+    return null;
+}
+
+  async findByUsername(username: string): Promise<User | null> {
+    return await this.userModel.findOne({ username }).exec();
+  }
+  
+  async comparePassword(plainPassword: string, hashedPassword: string): Promise<boolean> {
+    return await bcrypt.compare(plainPassword, hashedPassword);
   }
 
-  findOne(id: string) {
-    return `This action returns a #${id} user`;
+  async findById(id: string): Promise<User | null> {
+    try {
+      const user = await this.userModel.findById(id).exec(); // Busca el usuario por ObjectId
+      return user;
+    } catch (error) {
+      throw new Error('Error al buscar el usuario');
+    }
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise < User > {
