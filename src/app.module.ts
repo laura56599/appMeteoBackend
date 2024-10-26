@@ -7,6 +7,7 @@ import { UserModule } from './user/user.module';
 import * as dotenv from 'dotenv';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
+import { FavoriteModule } from './favorite/favorite.module';
 
 dotenv.config();
 @Module({
@@ -15,6 +16,7 @@ dotenv.config();
     UserModule,
     MongooseModule.forRoot(process.env.MONGODB_URI),
     AuthModule,
+    FavoriteModule,
   ],
   controllers: [AppController, WeatherController],
   providers: [AppService, AuthModule],
