@@ -1,12 +1,15 @@
 import { Module } from '@nestjs/common';
-import { WeatherService } from './weather.service';
+import { MongooseModule } from '@nestjs/mongoose';
 import { WeatherController } from './weather.controller';
-//import { MongooseModule } from '@nestjs/mongoose';
-import { Weather, WeatherSchema } from './weather.model';
+import { WeatherService } from './weather.service';
+import { Weather, WeatherSchema } from './entities/weather.entity';
+import { AuthModule } from '../auth/auth.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
-    //MongooseModule.forFeature([{ name: Weather.name, schema: WeatherSchema }]),
+    MongooseModule.forFeature([{ name: Weather.name, schema: WeatherSchema }]),
+    AuthModule, JwtModule,
   ],
   controllers: [WeatherController],
   providers: [WeatherService],

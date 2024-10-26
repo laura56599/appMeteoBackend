@@ -16,8 +16,8 @@ dotenv.config();
     MongooseModule.forRoot(process.env.MONGODB_URI),
     AuthModule,
   ],
-  controllers: [AppController, WeatherController],
-  providers: [AppService, AuthModule],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {
   constructor() {
