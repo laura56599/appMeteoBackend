@@ -1,57 +1,19 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import axios from 'axios';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Weather, WeatherDocument } from './entities/weather.entity';
-import { SaveWeatherDto } from './dto/save-weather.dto';
+//import { Weather } from './weather.model';
 
 @Injectable()
 export class WeatherService {
-  constructor(@InjectModel(Weather.name) private readonly weatherModel: Model<WeatherDocument>) {}
-
   async getWeatherData(location: string) {
     const apiKey = process.env.VISUAL_CROSSING_API_KEY;
-    const url = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${location}?key=${apiKey}&lang=es&unitGroup=metric`;
-    
-    try {
-      const response = await axios.get(url);
-      return response.data;
-    } catch (error) {
-      throw new Error('Error al obtener datos del clima de la API externa');
-    }
-  }
+    //const url = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${location}?key=${apiKey}`; //trae los datos en ingles y en grados fahrenheit
+    const url = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${location}?key=${apiKey}&lang=es&unitGroup=metric`; //trae los datos en español y en grados celsius
 
-  async saveWeather(userId: string, saveWeatherDto: SaveWeatherDto): Promise<Weather> {
-    const newWeather = new this.weatherModel({
-      latitude: saveWeatherDto.data.latitude,
-      longitude: saveWeatherDto.data.longitude,
-      address: saveWeatherDto.data.address,
-      timezone: saveWeatherDto.data.timezone,
-      tzoffset: saveWeatherDto.data.tzoffset,
-      description: saveWeatherDto.data.description,
-      days: saveWeatherDto.data.days,
-      userId, // Asocia el clima al usuario
-    });
+    const response = await axios.get(url);
+    const weatherData = response.data;
 
-    return await newWeather.save();
-  }
+    // aqui falta la parte para guardar el historial del usuario
 
-  async getWeatherByUser(userId: string): Promise<Weather[]> {
-    return await this.weatherModel.find({ userId }).exec();
-  }
-
-  async getWeatherById(weatherId: string): Promise<Weather> {
-    const weatherData = await this.weatherModel.findById(weatherId).exec();
-    if (!weatherData) {
-      throw new NotFoundException('Datos del clima no encontrados');
-    }
     return weatherData;
-  }
-
-  async removeWeather(userId: string, weatherId: string): Promise<void> {
-    const result = await this.weatherModel.findOneAndDelete({ _id: weatherId, userId });
-    if (!result) {
-      throw new NotFoundException('No se encontró ningún dato del clima para eliminar');
-    }
   }
 }

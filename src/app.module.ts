@@ -18,8 +18,8 @@ dotenv.config();
     AuthModule,
     FavoriteModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, WeatherController],
+  providers: [AppService, AuthModule],
 })
 export class AppModule {
   constructor() {

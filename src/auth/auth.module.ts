@@ -13,12 +13,12 @@ import { JwtAuthGuard } from './Guards/jwt-auth.guard';
     UserModule,
     PassportModule,
     JwtModule.register({
-      secret: 'Llave_s3cr3t4_2024',
+      secret: 'Llave_s3cr3t4_2024', 
       signOptions: { expiresIn: '700s' },
     }),
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtSt, JwtAuthGuard],
-  exports: [JwtAuthGuard, JwtModule, AuthService],
+  exports: [JwtAuthGuard],
 })
 export class AuthModule {}
