@@ -13,8 +13,9 @@ import { JwtAuthGuard } from './Guards/jwt-auth.guard';
     UserModule,
     PassportModule,
     JwtModule.register({
-      secret: 'Llave_s3cr3t4_2024', 
-      signOptions: { expiresIn: '700s' },
+      secret: 'Llave_s3cr3t4_2024',
+      //se cambia el tiempo del token a 7 dias
+      signOptions: { expiresIn: '7d' },
     }),
   ],
   controllers: [AuthController],
