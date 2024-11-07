@@ -10,6 +10,7 @@ async function bootstrap() {
   // Habilita el CORS para que acepte las solicitudes de el frontend
   app.enableCors({
     origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true, // Permite el envio del token en la solicitud cross-origin
   });
   await app.listen(process.env.PORT ?? 4000);

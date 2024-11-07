@@ -1,16 +1,41 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
-//import { Weather } from './weather.model';
 
 @Injectable()
 export class WeatherService {
   async getWeatherData(location: string) {
-    const apiKey = process.env.VISUAL_CROSSING_API_KEY;
-    //const url = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${location}?key=${apiKey}`; //trae los datos en ingles y en grados fahrenheit
-    const url = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${location}?key=${apiKey}&lang=es&unitGroup=metric`; //trae los datos en español y en grados celsius
-    const response = await axios.get(url);
-    const weatherData = response.data;
+  const apiKey = process.env.VISUAL_CROSSING_API_KEY;
+  // Si no se recibe una ubicación válida, lanzar un error.
+  if (!location || location === 'defaultCity') {
+    throw new Error('Ubicación no válida para la solicitud del clima');
+  }
 
-    return weatherData;
+  const url = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${encodeURIComponent(location)}?key=${apiKey}&lang=es&unitGroup=metric`;
+
+  try {
+    const response = await axios.get(url);
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener datos del clima desde Visual Crossing API:', error);
+    throw new Error('No se pudieron obtener los datos del clima.');
+  }
+}
+
+  async getWeatherDataByCoordinates(lat: string, lon: string) {
+    const apiKey = process.env.VISUAL_CROSSING_API_KEY;
+    const url = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${lat},${lon}?key=${apiKey}&lang=es&unitGroup=metric`;
+    const response = await axios.get(url);
+    return this.getWeatherData;
+  }
+
+  async getLunarPhase(location: string) {
+    const apiKey = process.env.VISUAL_CROSSING_API_KEY;
+    const url = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${location}?key=${apiKey}&lang=es&unitGroup=metric`;
+    const response = await axios.get(url);
+
+    // Aquí asumimos que la información de la fase lunar se encuentra en el primer día de la respuesta
+    const lunarPhase = response.data.days[0].moonphase;
+
+    return { phase: lunarPhase };
   }
 }

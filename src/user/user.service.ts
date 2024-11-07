@@ -5,18 +5,27 @@ import { User, UserDocument } from './entities/user.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
+
+
 @Injectable()
 export class UserService {
   
   constructor(@InjectModel(User.name) private readonly userModel: Model < UserDocument > ) {}
 
-  async create(createUserDto: CreateUserDto): Promise < User > {
+  async create(createUserDto: CreateUserDto): Promise<User> {
+  const hashpass = await this.hashPassword(createUserDto.password);
+  const newUser = new this.userModel({ ...createUserDto, password: hashpass });
 
-    const hashpass = await this.hashPassword(createUserDto.password);
-    const newUser = new this.userModel({ ...createUserDto, password: hashpass });
+  try {
     return await newUser.save();
-
+  } catch (error) {
+    console.error('Error al guardar el usuario:', error.message);
+    if (error.code === 11000) {
+      throw new ConflictException('El usuario o email ya está en uso');
+    }
+    throw new InternalServerErrorException('Error interno del servidor');
   }
+}
 
   private async hashPassword(password: string): Promise<string> {
     const saltRounds = 10;
@@ -73,3 +82,4 @@ export class UserService {
     }
   }
 }
+
