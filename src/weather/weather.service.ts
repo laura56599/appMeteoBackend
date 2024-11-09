@@ -25,7 +25,7 @@ export class WeatherService {
     const apiKey = process.env.VISUAL_CROSSING_API_KEY;
     const url = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${lat},${lon}?key=${apiKey}&lang=es&unitGroup=metric`;
     const response = await axios.get(url);
-    return this.getWeatherData;
+    return response.data;
   }
 
   async getLunarPhase(location: string) {
