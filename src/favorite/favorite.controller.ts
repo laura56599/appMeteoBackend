@@ -24,9 +24,10 @@ async create(@Body() createFavoriteDto: CreateFavoriteDto, @Request() req) {
 
  @UseGuards(JwtAuthGuard)
   @Get('/user')
-  async findUserFavorites(@Request() req: any) {
-    const userId = req.user.userId; // Obteniendo el userId desde el token
-    return this.favoriteService.findAllByUser(userId);
+  async findUserFavorites(@Request() req) {
+  console.log('User ID from token:', req.user.userId); // Debería mostrar el userId extraído del token
+  const userId = req.user.userId;
+  return this.favoriteService.findAllByUser(userId);
   }
 
   @Get(':id')
