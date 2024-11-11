@@ -8,9 +8,11 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('/login')
-  async login(@Body() body:{username: string; password: string}) {
-    return this.authService.login(body.username, body.password);
-  }
+async login(@Body() body: {username: string; password: string}) {
+  const response = await this.authService.login(body.username, body.password);
+  return response; // Asegúrate de retornar el objeto con `access_token` y `userId`
+}
+
 
   @Post('/register')
   async register(@Body() body: CreateUserDto) {

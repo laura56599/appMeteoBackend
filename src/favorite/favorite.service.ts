@@ -4,35 +4,38 @@ import { UpdateFavoriteDto } from './dto/update-favorite.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Favorite, FavDocument } from './entities/favorite.entity';
 import { Model } from 'mongoose';
+import { AddFavoriteDto } from './dto/add-favorite.dto';
 
 @Injectable()
 export class FavoriteService {
+  constructor(@InjectModel(Favorite.name) private readonly favModel: Model<FavDocument>) {}
 
-  constructor(@InjectModel(Favorite.name) private readonly favModel: Model < FavDocument > ) {}
+  async create(addFavoriteDto: AddFavoriteDto): Promise<Favorite> {
+  const lastFavorite = await this.favModel.findOne().sort({ id_fav: -1 }).exec();
+  const idFav = lastFavorite ? lastFavorite.id_fav + 1 : 1;
 
-  async create(createFavoriteDto: CreateFavoriteDto): Promise < Favorite > {
+  // Crear el nuevo documento con las propiedades necesarias
+  const favorites = new this.favModel({ ...addFavoriteDto, id_fav: idFav });
+  return favorites.save();
+}
 
-    const lastFavorite = await this.favModel.findOne().sort({ id_fav: -1 }).exec();
-    const idfav = lastFavorite ? lastFavorite.id_fav + 1 : 1;
-
-    // Crea el nuevo documento con el incremento `id_fav` 
-    const favorites = new this.favModel({ ...createFavoriteDto, id_fav: idfav });
-    return favorites.save();
+  async findAll(): Promise<Favorite[]> {
+    return this.favModel.find().exec();
   }
 
-  findAll() {
-    return `This action returns all favorite`;
+  async findAllByUser(userId: string): Promise<Favorite[]> {
+    return this.favModel.find({ userId }).exec();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} favorite`;
+  async findOne(id: number): Promise<Favorite> {
+    return this.favModel.findOne({ id_fav: id }).exec();
   }
 
-  update(id: number, updateFavoriteDto: UpdateFavoriteDto) {
-    return `This action updates a #${id} favorite`;
+  async update(id: number, updateFavoriteDto: UpdateFavoriteDto): Promise<Favorite> {
+    return this.favModel.findOneAndUpdate({ id_fav: id }, updateFavoriteDto, { new: true }).exec();
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} favorite`;
+  async remove(id: number): Promise<Favorite> {
+    return this.favModel.findOneAndDelete({ id_fav: id }).exec();
   }
 }
