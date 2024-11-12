@@ -10,67 +10,61 @@ export class WeatherController {
     @Query('location') location: string,
     @Res() res: Response,
   ) {
-    // Verifica si la ubicación se envió
     if (!location) {
-      return res
-        .status(HttpStatus.BAD_REQUEST)
-        .json({ success: false, message: 'Se requiere una ubicación' });
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        success: false,
+        message: 'Se requiere una ubicación para obtener el clima.',
+      });
     }
-
+  
     try {
-      const weatherData = await this.weatherService.getWeatherData(location); // Llama al servicio para obtener los datos del clima
-      return res
-        .status(HttpStatus.OK)
-        .json({ success: true, data: weatherData });
+      const weatherData = await this.weatherService.getWeatherData(location);
+      return res.status(HttpStatus.OK).json({
+        success: true,
+        data: weatherData,
+      });
     } catch (error) {
+      console.error('Error al obtener los datos del clima:', error);
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: 'Error al obtener datos del clima',
+        message: 'Error al obtener los datos del clima.',
       });
     }
   }
 
   @Get('/location')
-  async fetchWeatherByCoordinates(
-    @Query('lat') lat: string,
-    @Query('lon') lon: string,
-    @Res() res: Response,
-  ) {
-    // Verificamos que lat y lon no sean nulos o vacíos
-    if (!lat || !lon) {
+  async fetchWeatherByCoordinates(@Query('location') location: string, @Res() res: Response) {
+    if (location && location.includes(',')) {
+      const [lat, lon] = location.split(',').map(Number);
+  
+      if (isNaN(lat) || isNaN(lon)) {
+        return res.status(HttpStatus.BAD_REQUEST).json({
+          success: false,
+          message: 'Las coordenadas proporcionadas no son válidas.',
+        });
+      }
+  
+      try {
+        const weatherData = await this.weatherService.getWeatherDataByCoordinates(lat, lon);
+        return res.status(HttpStatus.OK).json({
+          success: true,
+          data: weatherData,
+        });
+      } catch (error) {
+        console.error('Error al obtener los datos del clima por coordenadas:', error);
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+          success: false,
+          message: 'Error al obtener los datos del clima.',
+        });
+      }
+    } else {
       return res.status(HttpStatus.BAD_REQUEST).json({
         success: false,
-        message:
-          'Se requieren las coordenadas de latitud y longitud para obtener los datos del clima',
-      });
-    }
-    const latitude = parseFloat(lat);
-    const longitude = parseFloat(lon);
-
-    if (isNaN(latitude) || isNaN(longitude)) {
-      return res.status(HttpStatus.BAD_REQUEST).json({
-        success: false,
-        message: 'Las coordenadas proporcionadas no son válidas.',
-      });
-    }
-
-    try {
-      // Llamada al servicio para obtener los datos del clima (convertir lat y lon a string)
-      const weatherData = await this.weatherService.getWeatherDataByCoordinates(
-        latitude.toString(), // Convertimos lat a string
-        longitude.toString(), // Convertimos lon a string
-      );
-      return res.status(HttpStatus.OK).json({
-        success: true,
-        data: weatherData, // Devolvemos la data recibida de la API externa
-      });
-    } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: 'Error al obtener los datos del clima por coordenadas',
+        message: 'Ubicación no válida o faltante.',
       });
     }
   }
+
   // Endpoint para obtener la fase lunar
   @Get('lunar-phase')
   async fetchLunarPhase(
