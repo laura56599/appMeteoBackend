@@ -11,12 +11,16 @@ export class FavoriteService {
   constructor(@InjectModel(Favorite.name) private readonly favModel: Model<FavDocument>) {}
 
   async create(addFavoriteDto: AddFavoriteDto): Promise<Favorite> {
-  const lastFavorite = await this.favModel.findOne().sort({ id_fav: -1 }).exec();
-  const idFav = lastFavorite ? lastFavorite.id_fav + 1 : 1;
 
-  // Crear el nuevo documento con las propiedades necesarias
-  const favorites = new this.favModel({ ...addFavoriteDto, id_fav: idFav });
-  return favorites.save();
+    try {
+      const lastFavorite = await this.favModel.findOne().sort({ id_fav: -1 }).exec();
+      const idFav = lastFavorite ? lastFavorite.id_fav + 1 : 1;
+      const favorites = new this.favModel({ ...addFavoriteDto, id_fav: idFav });
+      return await favorites.save();
+    }catch(error) {
+      console.error("Error al guardar el favorito", error);
+      throw new Error("Error al crear un favorito en Base de datos");
+    }
 }
 
   async findAll(): Promise<Favorite[]> {
